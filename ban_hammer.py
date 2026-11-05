@@ -6,71 +6,68 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-class WhatsAppBannHammer:
+class WhatsAppAccountCloser:
     def __init__(self, target_number):
         self.target = target_number
-        # إعداد المتصفح ليظهر كأنه جهاز عادي
         self.options = webdriver.ChromeOptions()
         self.options.add_argument("--disable-blink-features=Automation")
-        # نستخدم ChromeDriver الافتراضي الذي سيتم تثبيته لاحقًا
         self.driver = webdriver.Chrome(options=self.options)
 
-    def start_scan(self):
-        print("[+] Starting WhatsApp Ban Hammer...")
+    def start_close(self):
+        print("[+] Starting WhatsApp Account Closer...")
         print("[+] Please scan QR Code in the browser window...")
         
-        # فتح واتساب ويب مع رقم المستهدف مباشرة
+        # فتح واتساب ويب مع رقم المستهدف
         self.driver.get("https://web.whatsapp.com/send?phone=" + str(self.target))
         
-        # انتظار المسح
         try:
+            # انتظار تحميل الشات
             WebDriverWait(self.driver, 30).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "_3Fmc-"))
             )
-            print("[+] Scan Successful! Waiting for chat to load...")
+            print("[+] Chat Loaded! Starting Ban Process...")
             time.sleep(5) 
         except TimeoutException:
             print("[-] QR Code not scanned or timed out.")
             return
 
-        self.ban_process()
+        self.close_account()
 
-    def ban_process(self):
-        print("[+] Entering Report/Ban phase...")
+    def close_account(self):
         attempts = 0
-        max_attempts = 20 # عدد مرات الضغط على زر الإبلاغ
+        max_attempts = 30  # زيادة عدد البلاغات لزيادة فرص الإغلاق
         
         while attempts < max_attempts:
             try:
-                # محاولة العثور على زر القائمة (النقاط الثلاث)
+                # فتح القائمة
                 menu_button = self.driver.find_element(By.XPATH, "//span[@data-icon='more']")
                 menu_button.click()
                 time.sleep(1)
 
-                # محاولة العثور على خيار الإبلاغ (Report)
+                # الضغط على Report
                 report_option = self.driver.find_element(By.XPATH, "//span[text()='Report contact']")
                 report_option.click()
                 time.sleep(1)
 
-                # تأكيد الإجراء (Confirm)
+                # تأكيد الإبلاغ
                 confirm_btn = self.driver.find_element(By.XPATH, "//button[@aria-label='Report Contact']")
                 confirm_btn.click()
                 
                 attempts += 1
-                print(f"[+] Ban attempt {attempts}/{max_attempts} sent successfully!")
+                print(f"[+] Attempt {attempts}/{max_attempts} sent. Closing account...")
                 
-                # تأخير عشوائي بين كل محاولة
-                time.sleep(random.uniform(2, 4))
+                # تأخير عشوائي لمحاكاة سلوك بشري
+                time.sleep(random.uniform(1, 3))
 
             except Exception as e:
-                print(f"[-] Error during attempt {attempts}: {e}")
+                print(f"[-] Error at attempt {attempts}: {e}")
                 break
         
-        print("[+] Process finished. Check your WhatsApp account. The target number should be banned soon.")
+        print("[+] Process finished. The account should be closed/banned shortly.")
         input("Press Enter to close browser...")
         self.driver.quit()
 
 if __name__ == "__main__":
     target_num = input("Enter target number with country code (e.g., 9665xxxxxxxx): ")
-    bot = WhatsAppBannHammer(target_num)
-    bot.start_scan()
+    bot = WhatsAppAccountCloser(target_num)
+    bot.start_close()
