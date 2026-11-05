@@ -11,7 +11,21 @@ class WhatsAppAccountCloser:
         self.target = target_number
         self.options = webdriver.ChromeOptions()
         self.options.add_argument("--disable-blink-features=Automation")
-        self.driver = webdriver.Chrome(options=self.options)
+        from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
+# ... (باقي الكود كما هو)
+
+class WhatsAppAccountCloser:
+    def __init__(self, target_number):
+        self.target = target_number
+        self.options = webdriver.ChromeOptions()
+        self.options.add_argument("--disable-blink-features=Automation")
+        
+        # هذا السطر هو الحل: يقوم بتحميل chromdriver المناسب تلقائياً
+        service = Service(ChromeDriverManager().install())
+        self.driver = webdriver.Chrome(service=service, options=self.options)
 
     def start_close(self):
         print("[+] Starting WhatsApp Account Closer...")
